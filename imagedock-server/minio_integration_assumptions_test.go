@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	minio "github.com/minio/minio-go"
-	"github.com/xenogt/imagedock"
+	"github.com/washtubs/imagedock"
 )
 
 func TestMinioBasic(t *testing.T) {

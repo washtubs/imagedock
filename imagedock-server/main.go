@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-pg/pg"
 	logging "github.com/op/go-logging"
-	"github.com/xenogt/imagedock"
+	"github.com/washtubs/imagedock"
 )
 
 var log *logging.Logger = imagedock.GetLogger()
