@@ -6,6 +6,7 @@ import (
 	l "log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-pg/pg"
 	logging "github.com/op/go-logging"
@@ -37,12 +38,12 @@ func readPassOrTokenFromFile(filename string, maxSize int) string {
 		log.Fatalf("Password from %s exceeds max pass size %v > %v", filename, len(passwd), maxSize)
 	}
 
-	return string(passwd)
+	return strings.TrimSpace(string(passwd))
 }
 
-func argsToLaunchConfig([]string) *LaunchConfig {
+func argsToLaunchConfig(args []string) *LaunchConfig {
 
-	defaultFlagSet.Parse(os.Args[1:])
+	defaultFlagSet.Parse(args)
 
 	lconfig := new(LaunchConfig)
 	lconfig.PostgresOpts = new(pg.Options)
@@ -67,6 +68,8 @@ func argsToLaunchConfig([]string) *LaunchConfig {
 			lconfig.MinioOpts.Addr = flag.Value.String()
 		case "minio-default-bucket":
 			lconfig.MinioOpts.DefaultBucket = flag.Value.String()
+		case "minio-default-location":
+			lconfig.MinioOpts.DefaultLocation = flag.Value.String()
 		case "minio-access-key":
 			lconfig.MinioOpts.AccessKey = flag.Value.String()
 		case "minio-access-key-file":

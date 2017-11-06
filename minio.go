@@ -5,18 +5,19 @@ import (
 )
 
 type MinioConfig struct {
-	Addr          string
-	DefaultBucket string
-	AccessKey     string
-	SecretKey     string
-	secure        bool
+	Addr            string
+	DefaultBucket   string
+	DefaultLocation string
+	AccessKey       string
+	SecretKey       string
+	secure          bool
 }
 
-func CreateMinioClient(config MinioConfig) (*minio.Client, error) {
-	return minio.New("localhost",
-		"IK8XNAH6XL1CZK6TBP93",
-		"Y+2i4Pqn8eu2kmliJNiGlvqXnti3BWyeR2Ra2Ugu",
-		false)
+func CreateMinioClient(config *MinioConfig) (*minio.Client, error) {
+	return minio.New(config.Addr,
+		config.AccessKey,
+		config.SecretKey,
+		false) // TODO https
 }
 
 func Connect() {

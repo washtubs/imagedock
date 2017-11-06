@@ -1,8 +1,11 @@
 // +build integration
 
-package imagedock
+package main
 
 import (
+	"context"
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	minio "github.com/minio/minio-go"
@@ -10,9 +13,64 @@ import (
 )
 
 func TestMinioBasic(t *testing.T) {
-	lconfig := argsToLaunchConfig(getDockerComposeLaunchConfig(t))
-	var mc *minio.Client
-	mc = imagedock.CreateMinioClient(lconfig.MinioOpts)
+	lconfig := getDockerComposeLaunchConfig(t)
+	minioOpts := lconfig.MinioOpts
+
+	mc, err := imagedock.CreateMinioClient(minioOpts)
+	if err != nil {
+		t.Logf("Error creating minio client: %v", err)
+		t.FailNow()
+	}
+
+	err = mc.MakeBucket(minioOpts.DefaultBucket, minioOpts.DefaultLocation)
+	if err != nil {
+		t.Log("Error making bucket", err)
+	}
+
+	t.Log("Made bucket")
+
+	b, err := mc.BucketExists(minioOpts.DefaultBucket)
+	if err != nil {
+		t.Log("Error checking if bucket exists", err)
+		t.FailNow()
+	}
+
+	if b {
+		t.Log("bucket exists!")
+	}
+
+	s := "objectcontents"
+	reader := strings.NewReader(s)
+	//mc.PutObjectWithContext(
+	_, err = mc.PutObjectWithContext(context.Background(),
+		minioOpts.DefaultBucket,
+		"blah",
+		reader,
+		-1, //For size input as -1 PutObject does a multipart Put operation until input stream reaches EOF.
+		minio.PutObjectOptions{})
+
+	if err != nil {
+		t.Log("error putting object", err)
+		t.FailNow()
+	}
+
+	obj, err := mc.GetObjectWithContext(context.Background(),
+		minioOpts.DefaultBucket,
+		"blah",
+		minio.GetObjectOptions{})
+
+	if err != nil {
+		t.Log("error getting object", err)
+		t.FailNow()
+	}
+
+	buf, err := ioutil.ReadAll(obj)
+	if err != nil {
+		t.Log("Error reading object stream", err)
+		t.FailNow()
+	}
+
+	t.Logf("Got object back: %#v", string(buf))
 
 }
 
